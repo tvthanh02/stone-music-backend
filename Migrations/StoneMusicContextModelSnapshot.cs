@@ -28,6 +28,10 @@ namespace stone_music_backend.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("sAlbumId");
 
+                    b.Property<string>("AlbumGenreId")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("AlbumName")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)")
@@ -48,6 +52,8 @@ namespace stone_music_backend.Migrations
                     b.HasKey("AlbumId")
                         .HasName("PK_Album");
 
+                    b.HasIndex("AlbumGenreId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Album", (string)null);
@@ -67,25 +73,10 @@ namespace stone_music_backend.Migrations
                     b.HasKey("AlbumGenreId")
                         .HasName("PK_AlbumGenre");
 
+                    b.HasIndex("AlbumGenreName")
+                        .IsUnique();
+
                     b.ToTable("AlbumGenre", (string)null);
-                });
-
-            modelBuilder.Entity("stone_music_backend.Data.Album_AlbumGenre", b =>
-                {
-                    b.Property<string>("AlbumId")
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("sAlbumId");
-
-                    b.Property<string>("AlbumGenreId")
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("sAlbumGenreId");
-
-                    b.HasKey("AlbumId", "AlbumGenreId")
-                        .HasName("PK_Album_AlbumGenre");
-
-                    b.HasIndex("AlbumGenreId");
-
-                    b.ToTable("Album_AlbumGenre", (string)null);
                 });
 
             modelBuilder.Entity("stone_music_backend.Data.Comment", b =>
@@ -217,6 +208,10 @@ namespace stone_music_backend.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("bIsPrivate");
 
+                    b.Property<string>("PlayListGenreId")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("PlayListName")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)")
@@ -230,9 +225,31 @@ namespace stone_music_backend.Migrations
                     b.HasKey("PlayListId")
                         .HasName("PK_PlayList");
 
+                    b.HasIndex("PlayListGenreId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("PlayList", (string)null);
+                });
+
+            modelBuilder.Entity("stone_music_backend.Data.PlayListGenre", b =>
+                {
+                    b.Property<string>("PlayListGenreId")
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("sPlayListGenreId");
+
+                    b.Property<string>("PlayListGenreName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("sPlayListGenreName");
+
+                    b.HasKey("PlayListGenreId")
+                        .HasName("PK_PlayListGenre");
+
+                    b.HasIndex("PlayListGenreName")
+                        .IsUnique();
+
+                    b.ToTable("PlayListGerne", (string)null);
                 });
 
             modelBuilder.Entity("stone_music_backend.Data.PlayList_Track", b =>
@@ -312,9 +329,7 @@ namespace stone_music_backend.Migrations
 
                     b.HasIndex("AlbumId");
 
-                    b.HasIndex("TrackGenreId")
-                        .IsUnique()
-                        .HasFilter("[sTrackGenreId] IS NOT NULL");
+                    b.HasIndex("TrackGenreId");
 
                     b.HasIndex("UserId");
 
@@ -334,6 +349,9 @@ namespace stone_music_backend.Migrations
 
                     b.HasKey("TrackGenreId")
                         .HasName("PK_TrackGenre");
+
+                    b.HasIndex("TrackGenreName")
+                        .IsUnique();
 
                     b.ToTable("TrackGenre", (string)null);
                 });
@@ -398,6 +416,13 @@ namespace stone_music_backend.Migrations
 
             modelBuilder.Entity("stone_music_backend.Data.Album", b =>
                 {
+                    b.HasOne("stone_music_backend.Data.AlbumGenre", "AlbumGenre")
+                        .WithMany("Albums")
+                        .HasForeignKey("AlbumGenreId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_Album_AlbumGenre");
+
                     b.HasOne("stone_music_backend.Data.User", "User")
                         .WithMany("Albums")
                         .HasForeignKey("UserId")
@@ -405,28 +430,9 @@ namespace stone_music_backend.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Album_User");
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("stone_music_backend.Data.Album_AlbumGenre", b =>
-                {
-                    b.HasOne("stone_music_backend.Data.AlbumGenre", "AlbumGenre")
-                        .WithMany("Album_AlbumGenres")
-                        .HasForeignKey("AlbumGenreId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_Album_AlbumGenre_AlbumGenre");
-
-                    b.HasOne("stone_music_backend.Data.Album", "Album")
-                        .WithMany("Album_AlbumGenres")
-                        .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_Album_AlbumGenre_Album");
-
-                    b.Navigation("Album");
-
                     b.Navigation("AlbumGenre");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("stone_music_backend.Data.Comment", b =>
@@ -515,12 +521,21 @@ namespace stone_music_backend.Migrations
 
             modelBuilder.Entity("stone_music_backend.Data.PlayList", b =>
                 {
+                    b.HasOne("stone_music_backend.Data.PlayListGenre", "PlayListGenre")
+                        .WithMany("PlayLists")
+                        .HasForeignKey("PlayListGenreId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_PlayList_PlayListGenre");
+
                     b.HasOne("stone_music_backend.Data.User", "User")
                         .WithMany("PlayLists")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Playlist_User");
+
+                    b.Navigation("PlayListGenre");
 
                     b.Navigation("User");
                 });
@@ -556,8 +571,8 @@ namespace stone_music_backend.Migrations
                         .HasConstraintName("FK_Track_Album");
 
                     b.HasOne("stone_music_backend.Data.TrackGenre", "TrackGenre")
-                        .WithOne("Track")
-                        .HasForeignKey("stone_music_backend.Data.Track", "TrackGenreId")
+                        .WithMany("Tracks")
+                        .HasForeignKey("TrackGenreId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK_Track_TrackGenre");
 
@@ -577,19 +592,22 @@ namespace stone_music_backend.Migrations
 
             modelBuilder.Entity("stone_music_backend.Data.Album", b =>
                 {
-                    b.Navigation("Album_AlbumGenres");
-
                     b.Navigation("Tracks");
                 });
 
             modelBuilder.Entity("stone_music_backend.Data.AlbumGenre", b =>
                 {
-                    b.Navigation("Album_AlbumGenres");
+                    b.Navigation("Albums");
                 });
 
             modelBuilder.Entity("stone_music_backend.Data.PlayList", b =>
                 {
                     b.Navigation("PlayList_Tracks");
+                });
+
+            modelBuilder.Entity("stone_music_backend.Data.PlayListGenre", b =>
+                {
+                    b.Navigation("PlayLists");
                 });
 
             modelBuilder.Entity("stone_music_backend.Data.Track", b =>
@@ -605,7 +623,7 @@ namespace stone_music_backend.Migrations
 
             modelBuilder.Entity("stone_music_backend.Data.TrackGenre", b =>
                 {
-                    b.Navigation("Track");
+                    b.Navigation("Tracks");
                 });
 
             modelBuilder.Entity("stone_music_backend.Data.User", b =>

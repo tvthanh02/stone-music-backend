@@ -24,6 +24,18 @@ namespace stone_music_backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PlayListGerne",
+                columns: table => new
+                {
+                    sPlayListGenreId = table.Column<string>(type: "varchar(50)", nullable: false),
+                    sPlayListGenreName = table.Column<string>(type: "nvarchar(100)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayListGenre", x => x.sPlayListGenreId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TrackGenre",
                 columns: table => new
                 {
@@ -62,11 +74,18 @@ namespace stone_music_backend.Migrations
                     sAlBumName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     sDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    sUserId = table.Column<string>(type: "varchar(50)", nullable: false)
+                    sUserId = table.Column<string>(type: "varchar(50)", nullable: false),
+                    AlbumGenreId = table.Column<string>(type: "varchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Album", x => x.sAlbumId);
+                    table.ForeignKey(
+                        name: "FK_Album_AlbumGenre",
+                        column: x => x.AlbumGenreId,
+                        principalTable: "AlbumGenre",
+                        principalColumn: "sAlbumGenreId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Album_User",
                         column: x => x.sUserId,
@@ -106,41 +125,24 @@ namespace stone_music_backend.Migrations
                     sDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()"),
                     bIsPrivate = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    sUserId = table.Column<string>(type: "varchar(50)", nullable: false)
+                    sUserId = table.Column<string>(type: "varchar(50)", nullable: false),
+                    PlayListGenreId = table.Column<string>(type: "varchar(50)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PlayList", x => x.sPlayListId);
+                    table.ForeignKey(
+                        name: "FK_PlayList_PlayListGenre",
+                        column: x => x.PlayListGenreId,
+                        principalTable: "PlayListGerne",
+                        principalColumn: "sPlayListGenreId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Playlist_User",
                         column: x => x.sUserId,
                         principalTable: "User",
                         principalColumn: "sUserId",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Album_AlbumGenre",
-                columns: table => new
-                {
-                    sAlbumId = table.Column<string>(type: "varchar(50)", nullable: false),
-                    sAlbumGenreId = table.Column<string>(type: "varchar(50)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Album_AlbumGenre", x => new { x.sAlbumId, x.sAlbumGenreId });
-                    table.ForeignKey(
-                        name: "FK_Album_AlbumGenre_Album",
-                        column: x => x.sAlbumId,
-                        principalTable: "Album",
-                        principalColumn: "sAlbumId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Album_AlbumGenre_AlbumGenre",
-                        column: x => x.sAlbumGenreId,
-                        principalTable: "AlbumGenre",
-                        principalColumn: "sAlbumGenreId",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -285,80 +287,31 @@ namespace stone_music_backend.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Album_sUserId",
-                table: "Album",
-                column: "sUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Album_AlbumGenre_sAlbumGenreId",
-                table: "Album_AlbumGenre",
-                column: "sAlbumGenreId");
+                name: "IX_AlbumGenre_sAlbumGenreName",
+                table: "AlbumGenre",
+                column: "sAlbumGenreName",
+                unique: true);
+
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comment_sTrackId",
-                table: "Comment",
-                column: "sTrackId");
+                name: "IX_PlayListGerne_sPlayListGenreName",
+                table: "PlayListGerne",
+                column: "sPlayListGenreName",
+                unique: true);
+
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comment_sUserId",
-                table: "Comment",
-                column: "sUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Follow_sFolloweeId",
-                table: "Follow",
-                column: "sFolloweeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_History_sTrackId",
-                table: "History",
-                column: "sTrackId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_History_sUserId",
-                table: "History",
-                column: "sUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Like_sTrackId",
-                table: "Like",
-                column: "sTrackId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlayList_sUserId",
-                table: "PlayList",
-                column: "sUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlayList_Track_sTrackId",
-                table: "PlayList_Track",
-                column: "sTrackId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Track_sAlbumId",
-                table: "Track",
-                column: "sAlbumId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Track_sTrackGenreId",
-                table: "Track",
-                column: "sTrackGenreId",
-                unique: true,
-                filter: "[sTrackGenreId] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Track_sUserId",
-                table: "Track",
-                column: "sUserId");
+                name: "IX_TrackGenre_sTrackGenreName",
+                table: "TrackGenre",
+                column: "sTrackGenreName",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Album_AlbumGenre");
-
             migrationBuilder.DropTable(
                 name: "Comment");
 
@@ -375,19 +328,22 @@ namespace stone_music_backend.Migrations
                 name: "PlayList_Track");
 
             migrationBuilder.DropTable(
-                name: "AlbumGenre");
-
-            migrationBuilder.DropTable(
                 name: "PlayList");
 
             migrationBuilder.DropTable(
                 name: "Track");
 
             migrationBuilder.DropTable(
+                name: "PlayListGerne");
+
+            migrationBuilder.DropTable(
                 name: "Album");
 
             migrationBuilder.DropTable(
                 name: "TrackGenre");
+
+            migrationBuilder.DropTable(
+                name: "AlbumGenre");
 
             migrationBuilder.DropTable(
                 name: "User");
