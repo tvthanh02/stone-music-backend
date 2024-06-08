@@ -21,10 +21,12 @@ namespace stone_music_backend.Data
         public string UserId { get; set; }
         public virtual User User { get; set; }
 
+        public string AlbumGenreId { get; set; }
+        public virtual AlbumGenre AlbumGenre { get; set; }
+
         // collection property
         public virtual ICollection<Track> Tracks { get; set; }
 
-        public virtual ICollection<Album_AlbumGenre> Album_AlbumGenres { get; set; }
 
 
     }

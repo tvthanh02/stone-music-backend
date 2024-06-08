@@ -12,8 +12,6 @@ namespace stone_music_backend.Data
 
         }
 
-        public virtual DbSet<Album_AlbumGenre> Album_AlbumGenres { get; set; }
-
         public virtual DbSet<PlayList_Track> PlayList_Tracks { get; set; }
         public virtual DbSet<Track> Tracks { get; set; }
 
@@ -34,6 +32,8 @@ namespace stone_music_backend.Data
         public virtual DbSet<PlayList> PlayLists { get; set; }
 
         public virtual DbSet<User> Users { get; set; }
+
+        public virtual DbSet<PlayListGenre> PlayListGenres { get; set; }
 
 
 
@@ -71,23 +71,6 @@ namespace stone_music_backend.Data
 
            });
 
-            // Album_AlbumGenre
-
-            modelBuilder.Entity<Album_AlbumGenre>(entity =>
-           {
-               entity.HasKey(alg => new { alg.AlbumId, alg.AlbumGenreId }).HasName("PK_Album_AlbumGenre");
-               entity.HasOne(alg => alg.Album).WithMany(pl => pl.Album_AlbumGenres).HasForeignKey(alg => alg.AlbumId).HasConstraintName("FK_Album_AlbumGenre_Album").OnDelete(DeleteBehavior.Restrict);
-               entity.HasOne(alg => alg.AlbumGenre).WithMany(t => t.Album_AlbumGenres).HasForeignKey(alg => alg.AlbumGenreId).HasConstraintName("FK_Album_AlbumGenre_AlbumGenre").OnDelete(DeleteBehavior.Restrict);
-               entity.ToTable("Album_AlbumGenre");
-
-               // property
-
-               entity.Property(p => p.AlbumId).HasColumnName("sAlbumId").HasColumnType("varchar(50)").IsRequired();
-               entity.Property(p => p.AlbumGenreId).HasColumnName("sAlbumGenreId").HasColumnType("varchar(50)").IsRequired();
-
-           });
-
-
             // User
             modelBuilder.Entity<User>(entity =>
             {
@@ -122,7 +105,7 @@ namespace stone_music_backend.Data
             {
                 entity.HasKey(t => t.TrackId).HasName("PK_Track");
                 entity.HasOne(t => t.Album).WithMany(al => al.Tracks).HasForeignKey(t => t.AlbumId).HasConstraintName("FK_Track_Album").OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(t => t.TrackGenre).WithOne(tg => tg.Track).HasForeignKey<Track>(t => t.TrackGenreId).HasConstraintName("FK_Track_TrackGenre").OnDelete(DeleteBehavior.Restrict); ;
+                entity.HasOne(t => t.TrackGenre).WithMany(tg => tg.Tracks).HasForeignKey(t => t.TrackGenreId).HasConstraintName("FK_Track_TrackGenre").OnDelete(DeleteBehavior.Restrict); ;
                 entity.HasMany(t => t.Likes).WithOne(l => l.Track).HasForeignKey(l => l.TrackId).HasConstraintName("FK_Like_Track").OnDelete(DeleteBehavior.Restrict);
                 entity.HasMany(t => t.Histories).WithOne(h => h.Track).HasForeignKey(h => h.TrackId).HasConstraintName("FK_History_Track").OnDelete(DeleteBehavior.Restrict);
                 entity.HasMany(t => t.Comments).WithOne(c => c.Track).HasForeignKey(c => c.TrackId).HasConstraintName("FK_Comment_Track").OnDelete(DeleteBehavior.Restrict);
@@ -149,6 +132,7 @@ namespace stone_music_backend.Data
             modelBuilder.Entity<Album>(entity =>
             {
                 entity.HasKey(al => al.AlbumId).HasName("PK_Album");
+                entity.HasOne(al => al.AlbumGenre).WithMany(alg => alg.Albums).HasForeignKey(al => al.AlbumGenreId).HasConstraintName("FK_Album_AlbumGenre").OnDelete(DeleteBehavior.Restrict);
                 entity.ToTable("Album");
 
                 // property
@@ -165,6 +149,7 @@ namespace stone_music_backend.Data
             modelBuilder.Entity<AlbumGenre>(entity =>
            {
                entity.HasKey(alg => alg.AlbumGenreId).HasName("PK_AlbumGenre");
+               entity.HasIndex(alg => alg.AlbumGenreName).IsUnique();
                entity.ToTable("AlbumGenre");
 
                // property
@@ -245,6 +230,7 @@ namespace stone_music_backend.Data
             modelBuilder.Entity<PlayList>(entity =>
           {
               entity.HasKey(pl => pl.PlayListId).HasName("PK_PlayList");
+              entity.HasOne(pl => pl.PlayListGenre).WithMany(plg => plg.PlayLists).HasForeignKey(pl => pl.PlayListGenreId).HasConstraintName("FK_PlayList_PlayListGenre").OnDelete(DeleteBehavior.Restrict);
               entity.ToTable("PlayList");
 
               // property
@@ -264,12 +250,30 @@ namespace stone_music_backend.Data
             modelBuilder.Entity<TrackGenre>(entity =>
            {
                entity.HasKey(tg => tg.TrackGenreId).HasName("PK_TrackGenre");
+               entity.HasIndex(tg => tg.TrackGenreName).IsUnique();
                entity.ToTable("TrackGenre");
 
                // property
 
                entity.Property(p => p.TrackGenreId).HasColumnName("sTrackGenreId").HasColumnType("varchar(50)").IsRequired();
                entity.Property(p => p.TrackGenreName).HasColumnName("sTrackGenreName").HasColumnType("nvarchar(50)").IsRequired();
+
+           });
+
+
+            // PlayListGenre
+
+
+            modelBuilder.Entity<PlayListGenre>(entity =>
+           {
+               entity.HasKey(plg => plg.PlayListGenreId).HasName("PK_PlayListGenre");
+               entity.HasIndex(plg => plg.PlayListGenreName).IsUnique();
+               entity.ToTable("PlayListGerne");
+
+               // property
+
+               entity.Property(p => p.PlayListGenreId).HasColumnName("sPlayListGenreId").HasColumnType("varchar(50)").IsRequired();
+               entity.Property(p => p.PlayListGenreName).HasColumnName("sPlayListGenreName").HasColumnType("nvarchar(100)").IsRequired();
 
            });
 

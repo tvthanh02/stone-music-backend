@@ -11,9 +11,11 @@ namespace stone_music_backend.Data
 
         public string AlbumGenreName { get; set; }
 
+
+
         // collection property 
 
-        public virtual ICollection<Album_AlbumGenre> Album_AlbumGenres { get; set; }
+        public virtual ICollection<Album> Albums { get; set; }
 
     }
 }
